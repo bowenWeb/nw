@@ -24,7 +24,7 @@ import VFooter from '@/components/Footer'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
-  name: 'nwLayout',
+  name: 'VLayout',
   components: {
     VHeader,
     VFooter
