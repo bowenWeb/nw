@@ -1,0 +1,184 @@
+.confirm-btn{
+  width: 100px;
+  height: 38px;
+  background: #000000;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.cancel-btn{
+  width: 100px;
+  height: 38px;
+  background: #F1F2F5;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #A7ADBD;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ani-button-1{
+  border:1px solid #d0d0d0; 
+  position:relative; 
+  overflow: hidden; 
+  -webkit-transition: all .6s;
+  transition: all .6s;
+  height: 55px;
+  background: #0a1625;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: PingFang SC, PingFang SC-Semibold;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+  line-height: 55px;
+  cursor: pointer;
+  &:hover{
+    color:#fff; 
+    border-color:#8355E9;
+    .text{
+      position: relative;
+      z-index: 2;
+    }
+    .ani-block-1,.ani-block-2,.ani-block-3,.ani-block-4{
+      width:100%;
+    }
+    .ani-block-3,.ani-block-4{
+      -webkit-transition-delay:.4s;
+      transition-delay:.4s;
+    }
+  }
+  .ani-block-1,.ani-block-2,.ani-block-3,.ani-block-4{
+    background:#8355E9;
+    position: absolute;
+    top:0; 
+    width: 0px;
+    height: 100%;
+    -webkit-transition: all 0.4s; 
+    transition: all 0.4s; 
+    opacity:0.35;
+  }
+  .ani-block-3,.ani-block-4{
+    opacity:0.75;
+  }
+  .ani-block-1,.ani-block-4{
+    left:0
+  }
+  .ani-block-2,.ani-block-3{
+    right: 0;
+  }
+
+}
+
+.ani-button-2{
+  border:1px solid #d0d0d0; 
+  position:relative; 
+  overflow:hidden;
+  transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -webkit-transition: all 0.5s;
+  height: 55px;
+  background: #0a1625;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: PingFang SC, PingFang SC-Semibold;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+  line-height: 55px;
+  cursor: pointer;
+  &:hover{
+    color:#fff; 
+    border-color: #8355E9;
+    .text{
+      position: relative;
+      z-index: 2;
+    }
+    .ani-block-1{
+      width:100%; left:0px;
+    }
+  }
+  .ani-block-1{
+    width:0;
+    position:absolute; 
+    background: #8355E9; 
+    left:50%;  
+    top:0px; 
+    bottom:0px; 
+    transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+  }
+}
+
+.ani-button-3{
+  position: relative;
+  height: 50px;
+  background: #0a1625;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: PingFang SC, PingFang SC-Semibold;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+  line-height: 50px;
+  cursor: pointer;
+  &::before,&::after{
+    content: "";
+    width: 0;
+    height: 2px;
+    position: absolute;
+    transition: all .2s linear;
+    background: #4988FF;
+    transition-delay: 0s
+  }
+  &::before{
+    right: 0;
+    top: 0
+  }
+  &::after{
+    left: 0;
+    bottom: 0
+  }
+  &:hover{
+    &::before,&:after{
+      width: 100%;
+      transition-delay: .2s
+    }
+    .text{
+      &::before,&::after{
+        height: 100%;
+        transition-delay: 0s
+      }
+    }
+  }
+  .text{
+    &::before,&::after{
+      content: "";
+      width: 2px;
+      height: 0;
+      position: absolute;
+      transition: all .2s linear;
+      background: #4988FF;
+      transition-delay: .2s
+    }
+    &::before{
+      left: 0;
+      top: 0
+    }
+    &::after{
+      right: 0;
+      bottom: 0
+    }
+  }
+}
+
+.ani-button-4{
+
+}

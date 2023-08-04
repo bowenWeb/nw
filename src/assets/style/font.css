@@ -1,0 +1,9 @@
+@font-face{
+    font-family: 'WDCH';
+    src: url('../../assets/font/PingFang-Bold.ttf');
+}
+
+@font-face{
+    font-family: 'PingFang SC-Medium';
+    src: url('../../assets/font/PingFang-Medium.ttf');
+}
