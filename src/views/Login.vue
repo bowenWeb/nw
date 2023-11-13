@@ -3,47 +3,30 @@
     <div class="bg">
       <img :src="require('@/assets/image/login/image-bg.png')" alt="" />
     </div>
-    <div class="line top"></div>
-    <div class="line bottom"></div>
 
-    <div class="left">
-      <div class="row" v-if="tagsList.length >=1">
-        <div class="tag" :title="lodash.get(tagsList,'[0].tag','')">
-          {{ truncateString(lodash.get(tagsList,'[0].tag','')) }}
-        </div>
-        <img :src="require('@/assets/image/login/line-bg-1.png')" />
-        <div class="tag" :title="lodash.get(tagsList,'[1].tag','')">
-          {{ truncateString(lodash.get(tagsList,'[1].tag','')) }}
-        </div>
-      </div>
-      <div class="row" v-if="tagsList.length >=3">
-        <div class="tag" :title="lodash.get(tagsList,'[2].tag','')">
-          {{ truncateString(lodash.get(tagsList,'[2].tag','')) }}
-        </div>
-        <img :src="require('@/assets/image/login/line-bg-2.png')" />
-        <div class="tag" :title="lodash.get(tagsList,'[3].tag','')">
-          {{ truncateString(lodash.get(tagsList,'[3].tag','')) }}
-        </div>
-
-      </div>
-      <div class="row" v-if="tagsList.length >=5">
-        <img :src="require('@/assets/image/login/line-bg-4.png')" />
-        <div class="tag" :title="lodash.get(tagsList,'[4].tag','')">
-          {{ truncateString(lodash.get(tagsList,'[4].tag','')) }}
-        </div>
-      </div>
-      <div class="row"  v-if="tagsList.length >=6">
-        <div class="tag" :title="lodash.get(tagsList,'[5].tag','')">
-          {{ truncateString(lodash.get(tagsList,'[5].tag','')) }}
-        </div>
-
-        <div class="group">
-          <img :src="require('@/assets/image/login/line-bg-3.png')" />
-          <div class="tag" :title="lodash.get(tagsList,'[6].tag','')">
-            {{ truncateString(lodash.get(tagsList,'[6].tag','')) }}
+    <div class="logo">
+      <img :src="require('@/assets/image/logo-black.png')" />
+    </div>
+    <div class="content">
+      <div class="left">
+        <div class="tags-box">
+          <!-- <div class="top"></div>
+          <div class="bottom"></div>
+          <div class="left"></div>
+          <div class="right"></div> -->
+          <div class="tags-list">
+            <div class="tag"
+              v-for="(item,index) in tagsList.slice(0,32)" :key="index"
+              :style="[
+                { background:colors[index%4].color },
+                { border:`1px solid ${colors[index%4].border}` }
+              ]"
+            >
+              {{ item.tag }}
+            </div>
           </div>
         </div>
-      </div>
+
     </div>
     <div class="right">
       <div class="form">
@@ -55,27 +38,30 @@
           class="demo-ruleForm"
           label-position="top"
         >
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="loginForm.username" autocomplete="off" />
+          <el-form-item label="花名" prop="username">
+            <el-input v-model.trim="loginForm.username" autocomplete="off" placeholder="请输入花名"/>
           </el-form-item>
           <el-form-item label="密码" prop="password">
             <el-input
-              v-model="loginForm.password"
+              v-model.trim="loginForm.password"
               type="password"
               autocomplete="off"
               show-password
+              placeholder="请输入密码"
             />
           </el-form-item>
         </el-form>
-        <div class="login-btn" @click="submitForm">
-          <span class="text">登录</span>
+        <div class="login-btn">
+          <el-button type="primary" :loading="loading" @click="submitForm">登录</el-button>
         </div>
       </div>
     </div>
+    </div>
+
   </div>
 </template>
 <script>
-import { defineComponent, ref, reactive, onMounted, computed } from 'vue'
+import { defineComponent, ref, reactive, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Cookies, SESSION_TOKEN, USER_NAME } from '@/utils/cookie'
 import { useStore } from 'vuex'
@@ -86,39 +72,75 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const store = useStore()
+    const loading = ref(false)
     onMounted(() => {
-      store.dispatch('global/fetchTagsList')
+      store.dispatch('global/fetchTagsList', { tag_type: '', block: false })
+      window.addEventListener('keyup', keyEnter, false)
+    })
+
+    onUnmounted(() => {
+      window.removeEventListener('keyup', keyEnter, false)
     })
     const loginFormRef = ref()
     const loginForm = reactive({
-      username: 'admin',
-      password: 'abc123'
+      username: '',
+      password: ''
     })
 
     const rules = reactive({
-      username: { required: true, message: '请输入用户名！', trigger: 'blur' },
+      username: [
+        { required: true, message: '请输入花名！', trigger: 'blur' },
+        { pattern: /^[\u4E00-\u9FA5A-Za-z]+$/, message: '请输入中文、英文字符！', trigger: 'blur' }
+      ],
       password: { required: true, message: '请输入密码', trigger: 'blur' }
     })
 
-    const submitForm = (formEl) => {
+    const keyEnter = (e) => {
+      if (e.keyCode === 13 || e.keyCode === 100) {
+        submitForm()
+      }
+    }
+
+    const submitForm = () => {
       if (!loginFormRef.value) return
+      if (loading.value) return
       loginFormRef.value.validate((valid) => {
         if (valid) {
-          console.log(loginForm.username, 'submit!')
+          loading.value = true
           store.dispatch('login/fetchLogin', {
             username: loginForm.username,
             password: loginForm.password
           }).then(res => {
+            loading.value = false
             Cookies.setKey(SESSION_TOKEN, res)
             Cookies.setKey(USER_NAME, loginForm.username)
             router.push('/')
+          }).catch(error => {
+            loading.value = false
+            console.log(error, 'error')
           })
         } else {
+          loading.value = false
           console.log('error submit!')
           return false
         }
       })
     }
+
+    const colors = [
+      {
+        color: '#e4ffee', border: '#99E1B3'
+      },
+      {
+        color: '#fff7dd', border: '#F5DC8B'
+      },
+      {
+        color: '#fedddd', border: '#E49797'
+      },
+      {
+        color: '#f4e3ff', border: '#B889D7'
+      }
+    ]
 
     return {
       loginFormRef,
@@ -127,7 +149,9 @@ export default defineComponent({
       tagsList: computed(() => store.state.global.tagsList),
       submitForm,
       truncateString,
-      lodash: _
+      colors,
+      lodash: _,
+      loading
     }
   }
 })
@@ -136,32 +160,78 @@ export default defineComponent({
 .login{
   height: 100%;
   position: relative;
-  display: flex;
   background: #F5F6FD;
-  min-width: 1500px;
+  min-width: 1360px;
   overflow-x: auto;
+  .logo{
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    width: 208px;
+    margin: 0 auto 30px;
+    img{
+      width: 100%;
+    }
+  }
+  .content{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 100px;
+    height: 100%;
+  }
   .left{
     flex:1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
+    background: radial-gradient(circle, #fff, #F5F6FD);
+    height: 100%;
+    .tags-list{
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      column-gap: 20px;
+      position: relative;
+      padding: 100px;
+      .tag{
+        font-size: 20px;
+        color: #000;
+        font-weight: bold;
+        padding: 12px 25px;
+        border-radius: 30px;
+        margin-bottom: 30px;
+        cursor: pointer;
+        transition: all 0.3s;
+        &:hover{
+          transform: scale(1.1);
+        }
+      }
+    }
+    .row-group{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 20px;
+      box-sizing: border-box;
+    }
     .row{
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 30px;
-      &:nth-child(1){
+      &.pl12{
         padding-left: 12%;
       }
-      &:nth-child(2){
+      &.pl5{
         padding-left: 5%;
       }
-      &:nth-child(4){
-        padding-left: 15%;
-      }
       .tag{
-        font-size: 50px;
+        font-size: 36px;
         font-family: zihunbiantaoti, zihunbiantaoti-Regular;
         font-weight: bolder;
         color: #0a1625;
@@ -193,7 +263,6 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-right:100px;
     .form{
       position: relative;
       width: 400px;
@@ -236,71 +305,30 @@ export default defineComponent({
       }
       :deep(.el-input__wrapper){
         background: rgba(244, 244, 244, 0.8);
-        border-radius: 12px;
+        border-radius: 0px;
         padding: 6px 20px;
         border: none;
       }
 
       .login-btn{
-        width: 100%;
-        height: 50px;
-        background: #000000;
-        font-size: 14px;
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        position: relative;
-        transition: all .2s linear;
-        &:hover{
-          background: #ffffff;
-          color: #000000;
-          &::before,&:after{
-            width: 100%;
-            transition-delay: .2s
-          }
-          .text{
-            &::before,&::after{
-              height: 100%;
-              transition-delay: 0s
-            }
-          }
-        }
-        &::before,&::after{
-          content: "";
-          width: 0;
-          height: 2px;
-          position: absolute;
-          transition: all .2s linear;
+        :deep(.el-button){
+          width: 100%;
+          height: 50px;
           background: #000000;
-          transition-delay: 0s
-        }
-        &::before{
-          right: 0;
-          top: 0
-        }
-        &::after{
-          left: 0;
-          bottom: 0
-        }
-        .text{
-          &::before,&::after{
-            content: "";
-            width: 2px;
-            height: 0;
-            position: absolute;
-            transition: all .2s linear;
-            background: #000000;
-            transition-delay: .2s
-          }
-          &::before{
-            left: 0;
-            top: 0
-          }
-          &::after{
-            right: 0;
-            bottom: 0
+          font-size: 14px;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          position: relative;
+          transition: all 0.3s linear;
+          border-radius: 5px;
+          &:hover{
+            transform: scale(1.03);
+            color: rgba(255,255,255,.74);
+            background-color: #171819;
+            box-shadow: 0 0 rgba(0,0,0,.15);
           }
         }
       }
@@ -324,9 +352,9 @@ export default defineComponent({
     &.bottom{
       position: absolute;
       bottom: 0;
-      left: 30%;
+      left: 40%;
       border-image: linear-gradient(0deg, #ffbe25 1%, rgba(247,219,152,0.00)) 1.5 1.5;
     }
   }
 }
-</style>>
+</style>

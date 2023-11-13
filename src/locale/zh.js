@@ -3,6 +3,6 @@ export default {
     hot: '最热',
     rank: '排名',
     name: '大神',
-    receiveTags: '收到的标签数量'
+    receiveTags: '收到的TagX数量'
   }
 }

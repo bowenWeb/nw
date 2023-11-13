@@ -6,7 +6,7 @@
     <div class="mask"></div>
     <div class="card-info">
       <div class="name">{{obj.tag}}</div>
-      <div class="tags">认同*{{ obj.approve }}</div>
+      <div class="tags">Repetitions*{{ obj.approve }}</div>
     </div>
   </div>
 </template>
@@ -48,9 +48,9 @@ export default defineComponent({
     bottom:10px;
     width: calc(100% - 20px);
     height: 66px;
-    background: rgba(255,255,255,0.40);
+    background: rgba(255,255,255,0.3);
     border-radius: 8px;
-    filter: blur(0px);
+    backdrop-filter: blur(10px);
     z-index: 8;
   }
 

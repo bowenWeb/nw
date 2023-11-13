@@ -41,6 +41,16 @@ html,body{
 }
 
 .el-drawer{
+    .el-drawer__header{
+        padding: 20px;
+        border-bottom: 1px solid #e4e8eb;
+        margin-bottom: 0;
+        .el-drawer__title{
+            font-size: 16px;
+            color: #000000;
+            font-weight: bold;
+        }
+    }
     .el-drawer__body{
         .el-form{
             .el-form-item {
@@ -86,11 +96,82 @@ html,body{
                     justify-content: center;
                     align-items: center;
                     column-gap: 10px;
-                    color: #1667ff;
                     font-size: 14px;
                     cursor: pointer;
+                    .action{
+                        color: #656e76;
+                        text-decoration: underline;
+                    }
+                    .delete{
+                        color: #656e76;
+                        text-decoration: underline;
+                    }
                   }
             }
+        }
+    }
+}
+
+.el-pagination.is-background .btn-next.is-active, .el-pagination.is-background .btn-prev.is-active, .el-pagination.is-background .el-pager li.is-active{
+    background: #000;
+}
+
+.el-message-box{
+    .el-message-box__btns{
+        .el-button{
+            border-color:none;
+            &:hover{
+                outline: none;
+                // border-color:
+                // background-color:
+            }
+            &:focus-visible{
+                outline: none;
+            }
+        }
+        .el-button--primary{
+            background-color: #000000;
+        }
+    }
+}
+
+.el-message--success{
+    background: #efeff8;
+    border: 1px solid #767ffc;
+    border-radius: 6px;
+    top: 30px;
+    left: auto;
+    right: 30px;
+    transform: none;
+    .el-icon{
+        color: #767ffc;
+    }
+    .el-message__content{
+        color: #767ffc;
+    }
+}
+
+.el-message--error{
+    background: #f4dcdc;
+    border: 1px solid #EF3333;
+    border-radius: 6px;
+    top: 30px !important;
+    left: auto;
+    right: 30px;
+    transform: none;
+    .el-icon{
+        color: #EF3333;
+    }
+    .el-message__content{
+        color: #EF3333;
+    }
+}
+
+.el-dropdown-menu{
+    .el-dropdown-menu__item:not(.is-disabled){
+        &:focus{
+            background-color:#ebecfa !important;
+            color:#767ffc !important;
         }
     }
 }

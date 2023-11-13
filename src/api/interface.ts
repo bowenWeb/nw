@@ -8,6 +8,8 @@ const URL_API = {
   logout: '/api/v1/user/logout',
   password: '/api/v1/user/modify-password',
   userSet: '/api/v1/user/set',
+  userStatus: '/api/v1/user/status',
+  appraisals: '/api/v1/user/appraisals',
 
   proposalAdd: '/api/v1/proposal/add',
   proposalGet: '/api/v1/proposal/get',
@@ -23,6 +25,8 @@ const URL_API = {
   tagManage: '/api/v1/tag/manage',
 
   infoList: '/api/v1/user/info/list',
-  popularList: '/api/v1/user/popular/list'
+  popularList: '/api/v1/user/popular/list',
+  popularTop: '/api/v1/user/popular/top',
+  tokenList: '/api/v1/token-rec/list'
 }
 export default URL_API

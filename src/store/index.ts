@@ -20,6 +20,3 @@ export const store = createStore({
   }
 })
 
-export function useStore(): any {
-  return store
-}

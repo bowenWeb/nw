@@ -18,7 +18,7 @@ const amountToNW = (str:string) => {
   }
 }
 
-const truncateString = (str, length = 3) => {
+const truncateString = (str, length = 4) => {
   return str.length > length * 2
     ? `${str.slice(0, length)}...${str.slice(-length)}`
     : str

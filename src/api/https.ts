@@ -6,6 +6,7 @@ import axios, {
   AxiosResponse
 } from 'axios'
 import { Cookies, SESSION_TOKEN } from '@/utils/cookie'
+import { ElMessage } from 'element-plus'
 
 const _axios = () => {
   const service: AxiosInstance = axios.create({
@@ -38,7 +39,19 @@ const _axios = () => {
         if (result.code === 200) {
           resolve(result)
         } else {
-          reject(result)
+          if (result.code === 403) {
+            reject(result)
+            ElMessage({
+              showClose: true,
+              message: '登录失效，即将跳转登录页面',
+              type: 'error'
+            })
+            setTimeout(() => {
+              window.location.href = './login'
+            }, 3000)
+          } else {
+            reject(result)
+          }
         }
       })
     },

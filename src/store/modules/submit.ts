@@ -2,6 +2,7 @@ import _axios from '@/api/https'
 import URL_API from '@/api/interface'
 import { formatAmount } from '@/utils'
 import _ from 'lodash-es'
+import { ElMessage } from 'element-plus'
 
 const state = {
   amount: '0'
@@ -21,6 +22,12 @@ const actions = {
         const data = res.data ?? []
         resolve(data)
       }).catch(error => {
+        const { msg = '失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })

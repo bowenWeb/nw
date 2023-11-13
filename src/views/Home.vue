@@ -3,11 +3,11 @@
     <div class="content-width">
       <div class="banner-swiper swiper">
         <div class="swiper-wrapper">
-          <div class="swiper-slide" v-for="item in [1,2,3,4,5,6,7,8,9,10]" :key="item">
+          <div class="swiper-slide" v-for="item in [1]" :key="item">
             <div class="banner-item">
               <div class="banner-left">
-                <div class="banner-title">‘超’好玩的互动平台</div>
-                <div class="banner-des">发起提议，匿名评价，友好互动</div>
+                <div class="banner-title">超Web3的数字身份标签平台</div>
+                <div class="banner-des">一个数字身份、声誉标签、互动标记的社交平台</div>
               </div>
               <div class="banner-right">
                 <img class="banner-bg" :src="require('@/assets/image/home/banner-1.png')" alt="">
@@ -26,44 +26,29 @@
         </div>
         <div class="list-header-right">
           <div :class="tabsClass()">
-            <div :class="activeTab === item.value ? 'active tabs-item' : 'tabs-item'" v-for="item in tabs"
-              :key="item.value" @click="tabClick(item)">
+            <div
+              v-for="item in tabs"
+              class="tabs-item"
+              :class="activeTab === item.value ? 'active' : ''"
+              :key="item.value" @click="tabClick(item)"
+            >
               {{ item.label }}
             </div>
           </div>
         </div>
       </div>
-      <Rank></Rank>
-    </div>
-    <div class="position" v-for="(n,index) in jobs" :key="index">
-      <div class="list-header content-width">
-      <div class="list-header-left">
-        <div class="text">{{n.post}}</div>
-        <div class="img-wrap">
-          <img class="line" :src="require('@/assets/image/home/icon-line.png')" alt="">
+      <Rank v-if="activeTab === 20"></Rank>
+      <div v-else class="cards">
+        <div class="card-item" v-for="(item,index) in allList" :key="index">
+          <Card
+            :id="item.id"
+            :name="item.roster_name"
+            :url="`http://192.168.1.62:30700/images/${item.post_note}.png`"
+            :balance="item.balance"
+            :tags="item.tag_count"
+          ></Card>
         </div>
       </div>
-      <div class="list-header-right swiper-action">
-        <div :class="`swiper-${n.note}-prev swiper-prev`"><el-icon><Back /></el-icon></div>
-        <div :class="`swiper-${n.note}-next swiper-next`"><el-icon><Right /></el-icon></div>
-      </div>
-    </div>
-    <div class="cards" :style="{paddingLeft: paddingLeft}">
-      <div class="swiper" :id="`swiper-${n.note}`">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide" v-for="(m,idx) in n.child" :key="idx">
-
-            <Card
-              :id="m.id"
-              :name="m.roster_name"
-              :url="`http://192.168.1.62:30700/images/${n.note}.png`"
-              :balance="m.balance"
-              :tags="m.tags?.length"
-            ></Card>
-          </div>
-        </div>
-      </div>
-    </div>
     </div>
   </div>
 </template>
@@ -80,77 +65,44 @@ export default defineComponent({
   components: { Card, Rank },
   setup() {
     const store = useStore()
-    const keywords = ref('')
-    const activeTab = ref(7)
-    const paddingLeft = ref(0)
-    const jobs = computed(() => store.state.home.jobs)
+    const activeTab = ref(20)
     const tabs = [
       {
-        label: '7天',
-        value: 7
-      }, {
-        label: '15天',
-        value: 15
-      }, {
-        label: '30天',
-        value: 30
+        label: 'Top20',
+        value: 20
+      },
+      {
+        label: 'All',
+        value: 0
       }
     ]
     onMounted(() => {
-      const _width = document.getElementById('home-content').clientWidth
-      paddingLeft.value = `calc((100% - ${_width}px)/2)`
-
       new Swiper('.banner-swiper', {
-        slidesPerView: 1,
-        loop: true
+        slidesPerView: 1
       })
-
-      store.dispatch('home/fetchPopularList', activeTab.value)
-      store.dispatch('home/fetchInfo').then(res => {
-        const list = res ?? []
-        list.forEach(n => {
-          new Swiper(`#swiper-${n.note}`, {
-            slidesPerView: 6,
-            spaceBetween: 10,
-            navigation: {
-              nextEl: `.swiper-${n.note}-next`,
-              prevEl: `.swiper-${n.note}-prev`
-            }
-          })
-        })
-      })
+      store.dispatch('home/fetchRankList')
+      store.dispatch('home/fetchAllList')
     })
-    const filterStatus = (value, row) => {
-      return row.ServerStatus.databaseStatus === value
-    }
-    const infoSearch = () => {
-      console.log(keywords, 'keywords')
-    }
 
     const tabClick = (item) => {
       activeTab.value = item.value
-      store.dispatch('home/fetchPopularList', item.value)
     }
 
     const tabsClass = () => {
       const obj = {
-        7: 'tabs t0',
-        15: 'tabs t1',
-        30: 'tabs t2'
+        20: 'tabs t0',
+        0: 'tabs t1'
       }
       return obj[activeTab.value]
     }
 
     return {
-      keywords,
-      infoSearch,
-      filterStatus,
       tabsClass,
       activeTab,
       tabClick,
       tabs,
-      jobs,
-      paddingLeft
+      rankList: computed(() => store.state.home.rankList),
+      allList: computed(() => store.state.home.allList)
     }
   }
 })
@@ -168,7 +120,7 @@ export default defineComponent({
         justify-content: space-between;
         padding: 40px 52px;
         background: linear-gradient(180deg,#fefffe 0%, #dfe1ff 48%, #fefffe 100%);
-        border-radius: 10px;
+        border-radius: 12px;
         .banner-left{
           .banner-title{
             font-size: 50px;
@@ -195,11 +147,24 @@ export default defineComponent({
     }
   }
 
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(6,1fr);
+    gap: 20px;
+    .card-item{
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover{
+        transform: scale(1.1);
+      }
+    }
+  }
+
   .list-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
+    margin-bottom: 10px;
     .list-header-left {
       display: flex;
       align-items: center;
@@ -224,33 +189,12 @@ export default defineComponent({
 
       }
     }
-    .swiper-action{
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-      .swiper-prev,.swiper-next{
-        cursor: pointer;
-        width:40px;
-        height:40px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        &.swiper-button-disabled{
-          cursor:not-allowed;
-        }
-      }
-      .swiper-next{
-        border: 1px solid #e6e8ec;
-        border-radius: 50%;
-      }
-    }
-
     .list-header-right {
       .tabs {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        width: 155px;
+        width: 142px;
         height: 34px;
         background: #f6f6f6;
         border-radius: 8px;
@@ -266,22 +210,14 @@ export default defineComponent({
         &.t1{
           &::after{
             position: absolute;
-            left:54px;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-        }
-        &.t2{
-          &::after{
-            position: absolute;
-            left: 105px;
+            left:70px;
             top: 50%;
             transform: translateY(-50%);
           }
         }
         &::after{
           content: '';
-          width: 49px;
+          width: 70px;
           height: 30px;
           background: #ffffff;
           border-radius: 7px;
@@ -304,23 +240,6 @@ export default defineComponent({
           &.active {
             color: #000000;
           }
-        }
-      }
-    }
-  }
-
-  .position{
-    width: 100%;
-    overflow: hidden;
-    .cards {
-      display: flex;
-      column-gap: 20px;
-      :deep{
-        .swiper{
-            width: 100%;
-            margin-bottom: 60px;
-            padding-bottom: 20px;
-            overflow: hidden;
         }
       }
     }

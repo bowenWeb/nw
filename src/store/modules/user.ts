@@ -1,12 +1,12 @@
 import _axios from '@/api/https'
 import URL_API from '@/api/interface'
-import _ from 'lodash-es'
+import { ElMessage } from 'element-plus'
 const state = {
   userList: [],
   jobs: [],
   params: {
     page: 1,
-    size: 20
+    size: -1
   },
   total: 0
 }
@@ -32,8 +32,8 @@ const actions = {
     return new Promise((resolve, reject) => {
       _axios().get(URL_API.userList, {
         params: {
-          page: params.page - 1,
-          size: params.size
+          page: 0,
+          size: -1
         }
       }).then(res => {
         const data = res?.data?.data ?? []
@@ -52,6 +52,12 @@ const actions = {
       _axios().post(URL_API.userAdd, params).then(res => {
         resolve(res.data)
       }).catch(error => {
+        const { msg = '创建失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })
@@ -61,6 +67,12 @@ const actions = {
       _axios().post(URL_API.userSet, params).then(res => {
         resolve(res.data)
       }).catch(error => {
+        const { msg = '修改失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })
@@ -70,6 +82,12 @@ const actions = {
       _axios().delete(URL_API.userDelete, { params: { username } }).then(res => {
         resolve(res.data)
       }).catch(error => {
+        const { msg = '删除失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })
@@ -84,7 +102,23 @@ const actions = {
         reject(error)
       })
     })
+  },
+  fetchPassword: (context, params) => {
+    return new Promise((resolve, reject) => {
+      _axios().post(URL_API.password, params).then(res => {
+        resolve(res.data)
+      }).catch(error => {
+        const { msg = '修改失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
+        reject(error)
+      })
+    })
   }
+
 }
 
 export default {

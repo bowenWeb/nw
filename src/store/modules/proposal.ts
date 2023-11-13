@@ -1,5 +1,6 @@
 import _axios from '@/api/https'
 import URL_API from '@/api/interface'
+import { ElMessage } from 'element-plus'
 
 const state = {
   proposalList: [],
@@ -65,6 +66,12 @@ const actions = {
         const data = res.data ?? []
         resolve(data)
       }).catch(error => {
+        const { msg = '失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })
@@ -76,6 +83,12 @@ const actions = {
         const data = res.data ?? []
         resolve(data)
       }).catch(error => {
+        const { msg = '失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })
@@ -87,6 +100,12 @@ const actions = {
         const data = res.data ?? []
         resolve(data)
       }).catch(error => {
+        const { msg = '失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })

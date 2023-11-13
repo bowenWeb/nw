@@ -9,8 +9,8 @@ import './assets/style/font.css'
 import './assets/style/var.css'
 import './assets/style/reset.scss'
 import './assets/style/common.scss'
-import i18n from './i18n'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+// import i18n from './i18n'
 import zhCn from 'element-plus/dist/locale/zh-cn'
 
 const app = createApp(App)
@@ -22,5 +22,5 @@ app.use(ElementPlus, {
 })
 app.use(store)
 app.use(router)
-app.use(i18n)
+// app.use(i18n)
 app.mount('#app')

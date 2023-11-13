@@ -18,7 +18,7 @@ const actions = {
       })
     })
   },
-  fetchTagsDel: (context, params) => {
+  fetchTagsManage: (context, params) => {
     return new Promise((resolve, reject) => {
       _axios().post(URL_API.tagManage, params).then(res => {
         resolve(res.data)

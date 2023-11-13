@@ -1,7 +1,12 @@
 <template>
   <div class="user">
-    <div class="user-banner">
-      <img class="banner" :src="require('@/assets/image/personal-bg.png')" alt="">
+
+    <div class="banner">
+      <div class="bg">
+        <div class="title">欢迎加入焜耀</div>
+        <div class="des">加入焜耀是一件幸运的事</div>
+      </div>
+      <img class="img" :src="require('@/assets/image/cloud-bg-2.png')" alt="">
     </div>
     <div class="user-content content-width">
       <div class="table-action">
@@ -10,10 +15,9 @@
       </div>
       <div class="user-table">
         <div class="table">
-          <el-table border :data="userList"  style="width: 100%">
+          <el-table border :data="filterTableData"  style="width: 100%">
             <el-table-column prop="name" label="姓名" width="180" />
             <el-table-column prop="roster_name" label="花名" width="180" />
-            <el-table-column prop="post" label="职位" />
             <el-table-column prop="onboarding_at" label="入职时间">
               <template #default="scope">
                 {{formatDate(scope.row.onboarding_at)}}
@@ -24,19 +28,23 @@
                 {{formatDate(scope.row.formal)}}
               </template>
             </el-table-column>
-            <el-table-column label="操作">
+            <el-table-column>
+              <template #header>
+                <el-input v-model="search" size="small" placeholder="输入花名搜索" />
+              </template>
               <template #default="scope">
                 <div class="table-row-action">
-                  <span @click="editUser(scope.row)">编辑</span>
-                  <span @click="deleteUser(scope.row.name)">删除</span>
+                  <span class="action" @click="editUser(scope.row)">编辑</span>
+                  <span class="delete" @click="deleteUser(scope.row.roster_name)">删除</span>
                 </div>
               </template>
             </el-table-column>
+
           </el-table>
         </div>
-        <div class="pagination">
-          <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange"/>
-        </div>
+        <!-- <div class="pagination">
+          <el-pagination background layout="prev, pager, next" :current-page="params.page" :page-size="params.size" :total="total" @current-change="handleCurrentChange"/>
+        </div> -->
       </div>
     </div>
     <el-drawer v-model="drawer"
@@ -62,16 +70,6 @@
           <el-form-item label="密码" prop="password" v-if="!formData.ID">
             <el-input v-model="formData.password" autocomplete="off" type="password" placeholder="请输入密码" show-password/>
           </el-form-item>
-          <el-form-item label="职位" prop="post">
-            <el-select v-model="formData.post" placeholder="请选择职位">
-              <el-option
-                v-for="item in jobs"
-                :key="item.value"
-                :label="item.post"
-                :value="item.post"
-              />
-            </el-select>
-          </el-form-item>
 
           <el-form-item label="入职时间" prop="onboarding_at" >
             <el-date-picker
@@ -92,7 +90,9 @@
       <template #footer>
         <div class="btn-group">
           <div class="cancel-btn" @click="closeDrawer">取消</div>
-          <div class="confirm-btn" type="primary" @click="addUser(userFormRef)">确认</div>
+          <div class="confirm-btn" @click="addUser(userFormRef)">
+            <el-button type="primary" :loading="loading" @click="addUser(userFormRef)">确认</el-button>
+          </div>
         </div>
       </template>
     </el-drawer>
@@ -115,6 +115,8 @@ export default defineComponent({
     })
     const drawer = ref(false)
     const userFormRef = ref()
+    const search = ref('')
+    const loading = ref()
     const filterData = reactive({
       name: ''
     })
@@ -124,8 +126,6 @@ export default defineComponent({
       username: '',
       // 花名
       roster_name: '',
-      // 职位
-      post: '',
       // 密码
       password: '',
       // 入职时间
@@ -135,37 +135,65 @@ export default defineComponent({
     })
 
     const rules = reactive({
-      username: { required: true, message: '请输入姓名！', trigger: 'blur' },
-      roster_name: { required: true, message: '请输入花名！', trigger: 'blur' },
-      password: { required: true, message: '请输入密码！', trigger: 'blur' }
+      username: [
+        { required: true, message: '请输入姓名！', trigger: 'blur' },
+        { pattern: /^[\u4E00-\u9FA5A-Za-z]+$/, message: '请输入中文、英文字符！', trigger: 'blur' }
+      ],
+      roster_name: [
+        { required: true, message: '请输入花名！', trigger: 'blur' },
+        { pattern: /^[\u4E00-\u9FA5A-Za-z]+$/, message: '请输入中文、英文字符！', trigger: 'blur' }
+      ],
+      password: { required: true, message: '请输入密码！', trigger: 'blur' },
+      formal: { required: true, message: '请选择转正时间！', trigger: 'blur' },
+      onboarding_at: { required: true, message: '请选择入职时间！', trigger: 'blur' }
     })
     const addUser = (formEl) => {
       if (!formEl) return
+      if (loading.value) return
       formEl.validate((valid) => {
         if (valid) {
+          loading.value = true
           if (formData.ID) {
             const params = {
               username: formData.roster_name,
               onboarding_at: dayjs(formData.onboarding_at).format('YYYY-MM-DD'),
-              formal: dayjs(formData.formal).format('YYYY-MM-DD'),
-              post: formData.post
+              formal: dayjs(formData.formal).format('YYYY-MM-DD')
             }
             store.dispatch('user/fetchUserSet', params).then(res => {
               closeDrawer()
-              store.dispatch('user/fetchUserList', { page: 1, size: 20 })
+              ElMessage({
+                showClose: true,
+                message: '成功！',
+                type: 'success'
+              })
+              store.commit('user/SET_PARAMS', { page: 1, size: 20 })
+              store.dispatch('user/fetchUserList', store.state.user.params)
+              loading.value = false
+            }).catch(error => {
+              loading.value = false
+              console.log(error, 'error')
             })
           } else {
             const params = [{
               username: formData.username,
               roster_name: formData.roster_name,
-              post: formData.post,
               password: formData.password,
               onboarding_at: dayjs(formData.onboarding_at).format('YYYY-MM-DD'),
               formal: dayjs(formData.formal).format('YYYY-MM-DD')
             }]
             store.dispatch('user/fetchUserAdd', params).then(res => {
               closeDrawer()
-              store.dispatch('user/fetchUserList', { page: 1, size: 20 })
+              ElMessage({
+                showClose: true,
+                message: '成功！',
+                type: 'success'
+              })
+              store.commit('user/SET_PARAMS', { page: 1, size: 20 })
+              store.dispatch('user/fetchUserList', store.state.user.params)
+              loading.value = false
+            }).catch(error => {
+              loading.value = false
+              console.log(error, 'error')
             })
           }
         } else {
@@ -180,7 +208,6 @@ export default defineComponent({
       formData.ID = row.ID ?? 0
       formData.username = row.name ?? ''
       formData.roster_name = row.roster_name ?? ''
-      formData.post = row.post ?? ''
       formData.onboarding_at = row.onboarding_at ?? ''
       formData.formal = row.formal ?? ''
       openDrawer()
@@ -195,6 +222,8 @@ export default defineComponent({
               message: '删除成功！',
               type: 'success'
             })
+            store.commit('user/SET_PARAMS', { page: 1, size: 20 })
+            store.dispatch('user/fetchUserList', store.state.user.params)
           })
         })
         .catch(() => {
@@ -213,7 +242,6 @@ export default defineComponent({
       formData.ID = 0
       formData.username = ''
       formData.roster_name = ''
-      formData.post = ''
       formData.password = ''
       formData.onboarding_at = ''
       formData.formal = ''
@@ -238,11 +266,21 @@ export default defineComponent({
       addUser,
       jobs: computed(() => store.state.user.jobs),
       userList: computed(() => store.state.user.userList),
+      search,
+      filterTableData: computed(() =>
+        store.state.user.userList.filter(
+          (data) =>
+            !search.value ||
+            data.roster_name.toLowerCase().includes(search.value.toLowerCase())
+        )
+      ),
       total: computed(() => store.state.user.total),
+      params: computed(() => store.state.user.params),
       formatDate,
       editUser,
       handleCurrentChange,
-      deleteUser
+      deleteUser,
+      loading
     }
   }
 })
@@ -250,12 +288,47 @@ export default defineComponent({
 <style lang="scss" scoped>
 .user {
   flex: 1;
-  .user-banner{
-    margin-bottom: 20px;
-    .banner{
+  .banner{
+    margin-bottom: 60px;
+    position: relative;
+    height: 370px;
+    .img{
+      width: 70%;
+      max-width: 1000px;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .bg{
       width: 100%;
+      height: 370px;
+      background: linear-gradient(180deg,#fefffe, #dfe1ff 55%, #c9bdff 97%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      .title{
+        font-size: 50px;
+        font-family: PingFang SC, PingFang SC-Semibold;
+        font-weight: 600;
+        text-align: left;
+        color: #000;
+        line-height: 70px;
+        margin-bottom: 10px;
+        padding-top: 50px;
+      }
+      .des{
+        font-size: 16px;
+        font-family: PingFang SC, PingFang SC-Semibold;
+        font-weight: 600;
+        text-align: left;
+        color: #000;
+        line-height: 22px;
+      }
     }
   }
+
   .user-content{
     .filters{
       display: flex;
@@ -282,7 +355,7 @@ export default defineComponent({
       .title{
         font-size: 16px;
         font-family: WDCH, WDCH-Regular;
-        font-weight: 400;
+        font-weight: 600;
         color: #000000;
         line-height: 49px;
       }
@@ -311,6 +384,26 @@ export default defineComponent({
       align-items: center;
       justify-content: flex-end;
       column-gap: 10px;
+      .confirm-btn{
+        .el-button{
+          background: #000000;
+          border-radius: 12px;
+          font-size: 14px;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          margin: 0 auto;
+          border: none;
+        }
+      }
+    }
+  }
+  :deep(.el-input){
+    .el-input__wrapper{
+      height: 36px;
+      padding: 0 15px;
     }
   }
 }

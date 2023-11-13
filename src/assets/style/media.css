@@ -1,24 +1,21 @@
 @media screen and (max-width: 1439px) {
-    .content-width {
-      min-width: 1000px;
-      overflow-x: auto;
-      margin: 0px auto;
-      padding: 0px 20px;
-    }
+  .content-width {
+    padding: 0px 50px;
   }
-  
-  @media screen and (min-width: 1440px) {
-    .content-width {
-      max-width: 1440px;
-      margin: 0px auto;
-      padding: 0px 20px;
-    }
+}
+
+@media screen and (min-width: 1440px) {
+  .content-width {
+    max-width: 1440px;
+    margin: 0px auto;
+    padding: 0px 30px;
   }
-  
-  @media screen and (min-width: 1940px) {
-    .content-width {
-      max-width: 1440px;
-      margin: 0px auto;
-      padding: 0px 20px;
-    }
+}
+
+@media screen and (min-width: 1940px) {
+  .content-width {
+    max-width: 1440px;
+    margin: 0px auto;
+    padding: 0px 30px;
   }
+}

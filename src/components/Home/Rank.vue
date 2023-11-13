@@ -1,55 +1,69 @@
 <template>
-    <div class="home-rank">
+  <div>
+    <div class="home-rank" v-if="rankList.length">
       <div class="rank-left">
         <div class="rank-title">
-            <div class="rank">{{ t('home.rank')}}</div>
-            <div class="name">{{ t('home.name')}}</div>
-            <div class="tags">{{ t('home.receiveTags')}}</div>
+            <div class="rank">Rank</div>
+            <div class="name">大神</div>
+            <div class="tags">数量</div>
         </div>
-        <div class="rank-list" v-if="rankList.length">
-            <div class="rank-item" v-for="(item,index) in rankList.slice(0,5)" :key="item.rank">
+        <div class="rank-list">
+            <div
+              class="rank-item"
+              v-for="(item,index) in rankList.slice(0,10)"
+              :key="item.rank"
+              @click="goToPage(item.roster_name)"
+            >
                 <div class="rank">{{ index +1 }}</div>
                 <div class="name">
                     <div class="avatar">{{item.roster_name.slice(0,2)}}</div>
-                    <div class="text" @click="goToPage(item.roster_name)">{{item.roster_name}}</div>
+                    <div class="text">{{item.roster_name}}</div>
                     <img v-if="index===1" class="rank-no" :src="require('@/assets/image/home/icon-rank-2.png')" alt="">
                     <img v-if="index===2" class="rank-no" :src="require('@/assets/image/home/icon-rank-3.png')" alt="">
                     <img v-if="index===0" class="rank-no" :src="require('@/assets/image/home/icon-rank-1.png')" alt="">
                 </div>
-                <div class="tags">{{item.tag_count}}个标签</div>
+                <div class="tags"> TagX * {{item.tag_count}}</div>
             </div>
         </div>
       </div>
-      <div class="rank-right" v-if="rankList.length>5">
+      <div class="rank-right" v-if="rankList.length>10">
         <div class="rank-title">
-            <div class="rank">{{ t('home.rank')}}</div>
-            <div class="name">{{ t('home.name')}}</div>
-            <div class="tags">{{ t('home.receiveTags')}}</div>
+            <div class="rank">Rank</div>
+            <div class="name">大神</div>
+            <div class="tags">数量</div>
         </div>
         <div class="rank-list">
-            <div class="rank-item" v-for="(item,index) in rankList.slice(5,10)" :key="item.rank">
-                <div class="rank">{{ index + 6 }}</div>
+            <div
+              class="rank-item"
+              v-for="(item,index) in rankList.slice(10,20)"
+              :key="item.rank"
+              @click="goToPage(item.roster_name)"
+            >
+                <div class="rank">{{ index + 11 }}</div>
                 <div class="name">
                     <div class="avatar">{{item.roster_name.slice(0,2)}}</div>
-                    <div class="text" @click="goToPage(item.roster_name)">{{item.roster_name}}</div>
+                    <div class="text" >{{item.roster_name}}</div>
                 </div>
-                <div class="tags">{{item.tag_count}}个标签</div>
+                <div class="tags"> TagX * {{item.tag_count}}</div>
             </div>
         </div>
       </div>
     </div>
-  </template>
+    <div class="empty" v-else>
+      暂无数据,快去<span class="submit">TagX</span>吧
+    </div>
+  </div>
+</template>
 
 <script>
 import { defineComponent, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 export default defineComponent({
   name: 'home-rank-component',
   setup() {
     const store = useStore()
-    const { t } = useI18n()
+    // const { t } = useI18n()
     const rankList = computed(() => store.state.home.rankList)
     const router = useRouter()
     const goToPage = (name) => {
@@ -60,7 +74,7 @@ export default defineComponent({
       }
     }
     return {
-      t,
+      // t,
       goToPage,
       rankList
     }
@@ -87,6 +101,7 @@ export default defineComponent({
             text-align: justify;
             color: #656e76;
             line-height: 20px;
+            margin-bottom: 10px;
             .rank{
                 flex-shrink: 0;
                 flex-basis: 50px;
@@ -110,6 +125,13 @@ export default defineComponent({
                 color: #171717;
                 line-height: 20px;
                 padding: 10px 0;
+                cursor: pointer;
+                transition: all 0.5s;
+                &:hover{
+                  background: #f4f5fe;
+                  padding: 10px;
+                  border-radius: 2px;
+                }
                 .rank{
                     flex-shrink: 0;
                     flex-basis: 50px;
@@ -127,7 +149,7 @@ export default defineComponent({
                         font-family: PingFang SC, PingFang SC-Semibold;
                         font-weight: 600;
                         text-align: justify;
-                        color: #747dfc;
+                        color: #7863fb;
                         line-height: 20px;
                         text-align: center;
                         line-height: 48px;
@@ -148,6 +170,19 @@ export default defineComponent({
                 }
             }
         }
+    }
+  }
+  .empty{
+    padding: 30px;
+    text-align: center;
+    font-size: 15px;
+    color: #171717;
+    margin-bottom: 30px;
+    .submit{
+      text-decoration: underline;
+      color: #7863fb;
+      cursor: pointer;
+      margin: 0 2px;
     }
   }
   </style>

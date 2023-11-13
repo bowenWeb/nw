@@ -1,11 +1,15 @@
 <template>
   <div class="tags">
-    <div class="tags-banner">
-      <img class="banner" :src="require('@/assets/image/personal-bg.png')" alt="">
+    <div class="banner">
+      <div class="bg">
+        <div class="title">Tag，就是我想说的！</div>
+        <div class="des">去做Tag，不被定义的Tag,答案在Tag里，自由在风里</div>
+      </div>
+      <img class="img" :src="require('@/assets/image/cloud-bg-2.png')" alt="">
     </div>
     <div class="tags-content content-width">
       <div class="table-action">
-        <div class="title">标签列表</div>
+        <div class="title">TagX列表</div>
         <div class="confirm-btn" @click="openDrawer">添加</div>
       </div>
       <div class="tags-table">
@@ -16,7 +20,9 @@
             <el-table-column label="操作">
               <template #default="scope">
                 <div class="table-row-action">
-                  <span @click="deleteTag(scope.row.tag)">删除</span>
+                  <span class="delete" @click="deleteTag(scope.row.tag)">删除</span>
+                  <span v-if="scope.row.block">已屏蔽 </span>
+                  <span class="delete" v-else  @click="manageTag(scope.row.tag)">屏蔽</span>
                 </div>
               </template>
             </el-table-column>
@@ -25,7 +31,7 @@
       </div>
     </div>
     <el-drawer v-model="drawer"
-      title="添加标签"
+      title="添加TagX"
       :before-close="closeDrawer"
     >
 
@@ -38,8 +44,8 @@
           label-position="top"
         >
 
-          <el-form-item label="标签" prop="tag">
-            <el-input v-model="formData.tag" autocomplete="off" placeholder="请输入标签"/>
+          <el-form-item label="TagX" prop="tag">
+            <el-input v-model="formData.tag" autocomplete="off" placeholder="请输入TagX" maxlength="8"/>
           </el-form-item>
           <el-form-item label="备注" prop="note">
           <el-input v-model="formData.note" autocomplete="off" type="textarea" rows="3"/>
@@ -49,7 +55,9 @@
       <template #footer>
         <div class="btn-group">
           <div class="cancel-btn" @click="closeDrawer">取消</div>
-          <div class="confirm-btn" type="primary" @click="addTag(tagFormRef)">确认</div>
+          <div class="confirm-btn">
+            <el-button type="primary" :loading="loading" @click="addTag(tagFormRef)">确认</el-button>
+          </div>
         </div>
       </template>
     </el-drawer>
@@ -59,28 +67,30 @@
 import { defineComponent, reactive, ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { formatDate } from '@/utils/date'
 export default defineComponent({
   name: 'user-page',
   setup() {
     const store = useStore()
     onMounted(() => {
-      store.dispatch('global/fetchTagsList')
+      store.dispatch('global/fetchTagsList', { tag_type: '', block: '' })
     })
     const drawer = ref(false)
     const tagFormRef = ref()
+    const loading = ref()
     const formData = reactive({
       note: '',
       tag: ''
     })
 
     const rules = reactive({
-      tag: { required: true, message: '请输入标签！', trigger: 'blur' }
+      tag: { required: true, message: '请输入TagX！', trigger: 'blur' }
     })
     const addTag = (formEl) => {
       if (!formEl) return
+      if (loading.value) return
       formEl.validate((valid) => {
         if (valid) {
+          loading.value = true
           const params = {
             tag: formData.tag,
             note: formData.note,
@@ -88,10 +98,15 @@ export default defineComponent({
             tag_type: 0
           }
           store.dispatch('tags/fetchTagsAdd', params).then(res => {
+            loading.value = false
             closeDrawer()
-            store.dispatch('global/fetchTagsList')
+            store.dispatch('global/fetchTagsList', { tag_type: '', block: '' })
+          }).catch(error => {
+            loading.value = false
+            console.log(error, 'error')
           })
         } else {
+          loading.value = false
           console.log('error submit!')
           return false
         }
@@ -99,9 +114,9 @@ export default defineComponent({
     }
 
     const deleteTag = (tag) => {
-      ElMessageBox.confirm('确认要删除此账户吗?')
+      ElMessageBox.confirm('确认要删除此TagX吗?')
         .then(() => {
-          store.dispatch('tags/fetchTagsDel', {
+          store.dispatch('tags/fetchTagsManage', {
             op: 'del',
             tag
           }).then(res => {
@@ -110,7 +125,26 @@ export default defineComponent({
               message: '删除成功！',
               type: 'success'
             })
-            store.dispatch('global/fetchTagsList')
+            store.dispatch('global/fetchTagsList', { tag_type: '', block: '' })
+          })
+        })
+        .catch(() => {})
+    }
+
+    const manageTag = (tag) => {
+      ElMessageBox.confirm('确认要屏蔽此TagX吗?')
+        .then(() => {
+          store.dispatch('tags/fetchTagsManage', {
+            block: true,
+            op: 'set',
+            tag
+          }).then(res => {
+            ElMessage({
+              showClose: true,
+              message: '成功！',
+              type: 'success'
+            })
+            store.dispatch('global/fetchTagsList', { tag_type: '', block: '' })
           })
         })
         .catch(() => {})
@@ -138,7 +172,9 @@ export default defineComponent({
       tagFormRef,
       addTag,
       tagsList: computed(() => store.state.global.tagsList),
-      deleteTag
+      deleteTag,
+      manageTag,
+      loading
     }
   }
 })
@@ -146,12 +182,47 @@ export default defineComponent({
 <style lang="scss" scoped>
 .tags {
   flex: 1;
-  .tags-banner{
-    margin-bottom: 20px;
-    .banner{
+  .banner{
+    margin-bottom: 60px;
+    position: relative;
+    height: 370px;
+    .img{
+      width: 70%;
+      max-width: 1000px;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .bg{
       width: 100%;
+      height: 370px;
+      background: linear-gradient(180deg,#fefffe, #dfe1ff 55%, #c9bdff 97%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      .title{
+        font-size: 50px;
+        font-family: PingFang SC, PingFang SC-Semibold;
+        font-weight: 600;
+        text-align: left;
+        color: #000;
+        line-height: 70px;
+        margin-bottom: 10px;
+        padding-top: 50px;
+      }
+      .des{
+        font-size: 16px;
+        font-family: PingFang SC, PingFang SC-Semibold;
+        font-weight: 600;
+        text-align: left;
+        color: #000;
+        line-height: 22px;
+      }
     }
   }
+
   .tags-content{
     .filters{
       display: flex;
@@ -207,6 +278,20 @@ export default defineComponent({
       align-items: center;
       justify-content: flex-end;
       column-gap: 10px;
+      .confirm-btn{
+        .el-button{
+          background: #000000;
+          border-radius: 12px;
+          font-size: 14px;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          margin: 0 auto;
+          border: none;
+        }
+      }
     }
   }
 }

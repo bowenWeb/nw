@@ -1,5 +1,6 @@
 import _axios from '@/api/https'
 import URL_API from '@/api/interface'
+import { ElMessage } from 'element-plus'
 const state = {}
 const getters = {}
 const mutations = {
@@ -14,6 +15,12 @@ const actions = {
       _axios().post(URL_API.login, params).then(res => {
         resolve(res.data)
       }).catch(error => {
+        const { msg = '登录失败' } = error
+        ElMessage({
+          showClose: true,
+          message: msg,
+          type: 'error'
+        })
         reject(error)
       })
     })
